@@ -1,5 +1,7 @@
 import sys
 from generated.MainFrame import MainFrame
+from PIL import Image, ImageOps
+from PIL.ExifTags import TAGS, GPSTAGS, IFD
 import wx
 
 class PhotoCtrl(wx.App):
@@ -8,7 +10,8 @@ class PhotoCtrl(wx.App):
         print('On size %dx%d' % (W, H))
         if W != self.lastW and H != self.lastH:
             if self.imagePath:
-                img = wx.Image(imagePath, wx.BITMAP_TYPE_ANY)
+                image = Image.open(self.imagePath).convert("RGB")
+                rotated_im = ImageOps.exif_transpose(image)
                 if W > H:
                     NewW = W
                     NewH = int(W * H / W)
@@ -16,8 +19,10 @@ class PhotoCtrl(wx.App):
                     NewH = H
                     NewW = int(H * W / H)
 
-                img = img.Scale(NewW,NewH)
-                self.frame.mainBitmap.SetBitmap(wx.Bitmap(img))
+                im_resize = rotated_im.resize((NewW, NewH))
+                width, height = im_resize.size
+                bm = wx.Bitmap.FromBuffer(width, height, im_resize.tobytes())
+                self.frame.mainBitmap.SetBitmap(bm)
                 self.lastW = W
                 self.lastH = H
         e.Skip()
@@ -36,5 +41,32 @@ class PhotoCtrl(wx.App):
 if __name__ == '__main__':
     print(sys.argv)
     imagePath = sys.argv[1] if len(sys.argv) > 1 else None
+    if imagePath:
+        img = Image.open(imagePath)
+        img_exif = img.getexif()
+        print(type(img_exif))
+        if img_exif is None:
+            print('Sorry, image has no exif data.')
+        else:
+            print('>>>>>>>>>>>>>>>>>>', 'Base tags', '<<<<<<<<<<<<<<<<<<<<')
+            for k, v in img_exif.items():
+                tag = TAGS.get(k, k)
+                print(tag, v)
+
+            for ifd_id in IFD:
+                print('>>>>>>>>>', ifd_id.name, '<<<<<<<<<<')
+                try:
+                    ifd = img_exif.get_ifd(ifd_id)
+
+                    if ifd_id == IFD.GPSInfo:
+                        resolve = GPSTAGS
+                    else:
+                        resolve = TAGS
+
+                    for k, v in ifd.items():
+                        tag = resolve.get(k, k)
+                        print(tag, v)
+                except KeyError:
+                    pass
     app = PhotoCtrl(imagePath)
     app.MainLoop()
