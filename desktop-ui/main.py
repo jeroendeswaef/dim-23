@@ -3,26 +3,33 @@ from generated.MainFrame import MainFrame
 import wx
 
 class PhotoCtrl(wx.App):
+    def mainBitmap_onSize(self, e=None):
+        W, H = self.frame.mainBitmap.Size
+        print('On size %dx%d' % (W, H))
+        if W != self.lastW and H != self.lastH:
+            if self.imagePath:
+                img = wx.Image(imagePath, wx.BITMAP_TYPE_ANY)
+                if W > H:
+                    NewW = W
+                    NewH = int(W * H / W)
+                else:
+                    NewH = H
+                    NewW = int(H * W / H)
+
+                img = img.Scale(NewW,NewH)
+                self.frame.mainBitmap.SetBitmap(wx.Bitmap(img))
+                self.lastW = W
+                self.lastH = H
+        e.Skip()
+
     def __init__(self, imagePath=None):
+        self.imagePath = imagePath
+        self.lastW = None
+        self.lastH = None
         wx.App.__init__(self)
-        self.frame = MainFrame(None) #wx.Frame(None, title='Photo Control')
-        self.PhotoMaxSize = 240
-        if imagePath:
-            self.frame.m_staticText1.SetLabel(imagePath) 
-            img = wx.Image(imagePath, wx.BITMAP_TYPE_ANY)
-            # scale the image, preserving the aspect ratio
-            W = img.GetWidth()
-            H = img.GetHeight()
-            if W > H:
-                NewW = self.PhotoMaxSize
-                NewH = int(self.PhotoMaxSize * H / W)
-            else:
-                NewH = self.PhotoMaxSize
-                NewW = int(self.PhotoMaxSize * W / H)
-
-            img = img.Scale(NewW,NewH)
-
-            self.frame.mainBitmap.SetBitmap(wx.Bitmap(img))
+        self.frame = MainFrame(None) 
+       
+        self.frame.mainBitmap.Bind( wx.EVT_SIZE, self.mainBitmap_onSize )
       
         self.frame.Show()
         

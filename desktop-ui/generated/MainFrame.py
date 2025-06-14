@@ -24,21 +24,13 @@ class MainFrame ( wx.Frame ):
 
         self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
 
-        bSizer1 = wx.BoxSizer( wx.VERTICAL )
-
-        self.mainPanel = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-        bSizer1.Add( self.mainPanel, 1, wx.EXPAND | wx.ALL, 5 )
-
-        self.m_staticText1 = wx.StaticText( self, wx.ID_ANY, _(u"MyLabel"), wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText1.Wrap( -1 )
-
-        bSizer1.Add( self.m_staticText1, 0, wx.ALL, 5 )
+        gSizer1 = wx.GridSizer( 0, 2, 0, 0 )
 
         self.mainBitmap = wx.StaticBitmap( self, wx.ID_ANY, wx.NullBitmap, wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer1.Add( self.mainBitmap, 0, wx.ALL, 5 )
+        gSizer1.Add( self.mainBitmap, 0, wx.ALL|wx.EXPAND, 5 )
 
 
-        self.SetSizer( bSizer1 )
+        self.SetSizer( gSizer1 )
         self.Layout()
 
         self.Centre( wx.BOTH )
