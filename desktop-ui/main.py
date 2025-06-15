@@ -3,6 +3,12 @@ from generated.MainFrame import MainFrame
 from PIL import Image, ImageOps
 from PIL.ExifTags import TAGS, GPSTAGS, IFD
 import wx
+import piexif
+import pickle
+
+custom_tags = {'url_current'   : 'https://stackoverflow.com/q/52729428/1846249',
+        'contains_fish' : False,
+        3               : 0.14159265358979323, }
 
 class PhotoCtrl(wx.App):
     def mainBitmap_onSize(self, e=None):
@@ -44,7 +50,6 @@ if __name__ == '__main__':
     if imagePath:
         img = Image.open(imagePath)
         img_exif = img.getexif()
-        print(type(img_exif))
         if img_exif is None:
             print('Sorry, image has no exif data.')
         else:
@@ -68,5 +73,13 @@ if __name__ == '__main__':
                         print(tag, v)
                 except KeyError:
                     pass
+        
+        data = pickle.dumps(custom_tags)
+        exif_dict = piexif.load(img.info["exif"])
+        exif_dict.setdefault('Exif', {})
+        exif_dict["Exif"] = exif_dict["Exif"] | { piexif.ExifIFD.UserComment: data }
+        exif_bytes = piexif.dump(exif_dict)
+        img.save(imagePath, exif=exif_bytes)
+    
     app = PhotoCtrl(imagePath)
-    app.MainLoop()
+    app.MainLoop() 
