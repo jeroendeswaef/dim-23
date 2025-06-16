@@ -5,6 +5,7 @@ from PIL.ExifTags import TAGS, GPSTAGS, IFD
 import wx
 import piexif
 import pickle
+import json
 
 custom_tags = {'url_current'   : 'https://stackoverflow.com/q/52729428/1846249',
         'contains_fish' : False,
@@ -33,13 +34,25 @@ class PhotoCtrl(wx.App):
                 self.lastH = H
         e.Skip()
 
-    def __init__(self, imagePath=None):
+    def __init__(self, imagePath=None, exifDict = {}):
+        wx.App.__init__(self)
         self.imagePath = imagePath
+        self.exifDict = exifDict
         self.lastW = None
         self.lastH = None
-        wx.App.__init__(self)
+        
         self.frame = MainFrame(None) 
-       
+        listctrl = self.frame.metadataListCtrl
+        listctrl.AppendTextColumn("Name")
+        listctrl.AppendTextColumn("Value")
+        exifFilledStructure = self.exifDict['Exif'] | {}
+        exifFilledStructure.setdefault(piexif.ExifIFD.UserComment, None)
+        userCommentBlob = exifFilledStructure[piexif.ExifIFD.UserComment]
+        if userCommentBlob:
+            for k, v in pickle.loads(userCommentBlob).items(): 
+                data = [str(k), str(v)]
+                listctrl.AppendItem(data)
+
         self.frame.mainBitmap.Bind( wx.EVT_SIZE, self.mainBitmap_onSize )
       
         self.frame.Show()
@@ -81,5 +94,5 @@ if __name__ == '__main__':
         exif_bytes = piexif.dump(exif_dict)
         img.save(imagePath, exif=exif_bytes)
     
-    app = PhotoCtrl(imagePath)
+    app = PhotoCtrl(imagePath, exif_dict)
     app.MainLoop() 
