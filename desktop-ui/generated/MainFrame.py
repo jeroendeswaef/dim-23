@@ -9,7 +9,7 @@
 
 import wx
 import wx.xrc
-import wx.dataview
+from EditableListCtrl import EditableListCtrl
 
 import gettext
 _ = gettext.gettext
@@ -30,8 +30,8 @@ class MainFrame ( wx.Frame ):
         self.mainBitmap = wx.StaticBitmap( self, wx.ID_ANY, wx.NullBitmap, wx.DefaultPosition, wx.DefaultSize, 0 )
         gSizer1.Add( self.mainBitmap, 0, wx.ALL|wx.EXPAND, 5 )
 
-        self.metadataListCtrl = wx.dataview.DataViewListCtrl( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.dataview.DV_ROW_LINES )
-        gSizer1.Add( self.metadataListCtrl, 0, wx.ALL|wx.EXPAND, 5 )
+        self.editablePropertiesList = EditableListCtrl( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LC_REPORT )
+        gSizer1.Add( self.editablePropertiesList, 0, wx.ALL|wx.EXPAND, 5 )
 
 
         self.SetSizer( gSizer1 )

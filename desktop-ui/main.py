@@ -42,16 +42,20 @@ class PhotoCtrl(wx.App):
         self.lastH = None
         
         self.frame = MainFrame(None) 
-        listctrl = self.frame.metadataListCtrl
-        listctrl.AppendTextColumn("Name")
-        listctrl.AppendTextColumn("Value")
+
+        listCtrl = self.frame.editablePropertiesList
+        listCtrl.InsertColumn(0, "Name")
+        listCtrl.InsertColumn(1, "Value")
         exifFilledStructure = self.exifDict['Exif'] | {}
         exifFilledStructure.setdefault(piexif.ExifIFD.UserComment, None)
         userCommentBlob = exifFilledStructure[piexif.ExifIFD.UserComment]
         if userCommentBlob:
+            index = 0
             for k, v in pickle.loads(userCommentBlob).items(): 
                 data = [str(k), str(v)]
-                listctrl.AppendItem(data)
+                listCtrl.InsertItem(index, data[0])
+                listCtrl.SetItem(index, 1, data[1])
+                index += 1
 
         self.frame.mainBitmap.Bind( wx.EVT_SIZE, self.mainBitmap_onSize )
       
